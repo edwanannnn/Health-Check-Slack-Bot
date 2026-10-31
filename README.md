@@ -1,197 +1,183 @@
-# TensorNex Health-Check Slack Bot 🤖
+# 🤖 TensorNex Health-Check Slack Bot
 
-Bot Slack yang memonitor semua service TensorNex GPU Server dan mengirim alert otomatis ke Slack.
+> Automated infrastructure and AI/ML pipeline health monitoring bot with real-time Slack alerting — powered by Python, Docker, and Slack Bolt in Socket Mode.
 
-## Fitur
-
-| Fitur | Deskripsi |
-|-------|-----------|
-| `/healthcheck` | Ketik di Slack → langsung dapat full report semua service |
-| `@bot` mention | Mention bot di channel → sama seperti `/healthcheck` |
-| DM ke bot | Kirim pesan apapun ke bot → dapat health report |
-| 🚨 Auto Alert | Cek berkala, **hanya kirim alert kalau ada service yang DOWN** |
-| ✅ Recovery Alert | Kirim notifikasi kalau service yang mati sudah **pulih kembali** |
-
-> Bot **TIDAK** spam — diam kalau semua sehat. Hanya bicara saat ada perubahan status.
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white)
+![Slack](https://img.shields.io/badge/Slack-Bolt_Socket_Mode-4A154B?logo=slack&logoColor=white)
+![GPU](https://img.shields.io/badge/GPU-NVIDIA_RTX_A6000-76B900?logo=nvidia&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Production_Ready-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
 ---
 
-## Setup Slack App
+## 📌 Overview
 
-### 1. Aktifkan Socket Mode
+**TensorNex Health Bot** is a production-grade observability and alerting agent engineered for high-availability AI/ML infrastructure. It continuously tracks the operational status of GPU hardware, deep learning engines, and distributed backend services, streaming formatted status updates and instant incident notifications directly to Slack engineering channels.
 
-1. Buka **Slack App Settings** → klik app TensorNex
-2. Sidebar kiri → **Socket Mode**
-3. Toggle **Enable Socket Mode** → ON
-4. Klik **Generate Token** → beri nama (misal `bot-socket`) → tambahkan scope `connections:write`
-5. **Copy token** yang dimulai dengan `xapp-...` → ini `SLACK_APP_TOKEN`
+Operating via **Slack Socket Mode**, the bot requires **no public inbound endpoints, open ports, or reverse proxies**, making it exceptionally secure and turnkey to deploy behind enterprise firewalls or within private VPCs.
 
-### 2. Ambil Bot Token
+---
 
-1. Sidebar kiri → **OAuth & Permissions**
-2. Scroll ke **Bot User OAuth Token** → copy token `xoxb-...` → ini `SLACK_BOT_TOKEN`
-3. Scroll ke **Scopes** → pastikan ada:
-   - `chat:write` — kirim pesan
-   - `commands` — handle slash commands
-   - `app_mentions:read` — baca @mentions
-   - `im:history` — baca DMs
-   - `im:read` — akses DM channel
-   - `im:write` — balas DMs
+## ✨ Key Features
 
-### 3. Ambil Signing Secret
+- **⚡ Zero Inbound Footprint:** Runs over WebSockets (Slack Socket Mode); no need for public IP addresses or webhook tunneling (e.g., ngrok).
+- **🔕 Intelligent Noise Suppression:** Does not spam channels when services are operational. Alerts are emitted **only on state transitions** (when a service goes DOWN or RECOVERS).
+- **🎮 GPU Hardware Telemetry:** Real-time VRAM allocation, hardware status, and active compute task monitoring for enterprise accelerators (e.g., NVIDIA RTX A6000).
+- **🧠 AI/ML Engine Auditing:** Continuous probing of natural language processing and embedding inference endpoints (bge-m3, minilm, spacy, docling, rerankers).
+- **📦 Distributed Services Monitoring:** Health aggregation across databases, message brokers, and vector stores (Kafka, Elasticsearch, Redis, Qdrant, Neo4j, MinIO).
+- **💬 Interactive Operations:** On-demand full health audits via `/healthcheck` slash command, `@bot` mentions, or 1-on-1 Direct Messages.
 
-1. Sidebar kiri → **Basic Information**
-2. Scroll ke **App Credentials** → **Signing Secret** → klik Show → copy → ini `SLACK_SIGNING_SECRET`
+---
 
-### 4. Buat Slash Command
+## 🏗️ Architecture
 
-1. Sidebar kiri → **Slash Commands**
-2. Klik **Create New Command**
-   - Command: `/healthcheck`
-   - Short Description: `Check TensorNex service health`
-   - Usage Hint: _(kosongkan)_
-3. Save
-
-### 5. Subscribe Events
-
-1. Sidebar kiri → **Event Subscriptions**
-2. Toggle ON
-3. Di **Subscribe to bot events**, tambahkan:
-   - `app_mention`
-   - `message.im`
-4. Save
-
-### 6. Invite Bot ke Channel
-
-Di Slack, buka channel `#monitoring` (atau channel alertnya), lalu ketik:
 ```
-/invite @NamaBotmu
+                                  Private VPC / Infrastructure Host
+┌──────────────────────┐        ┌──────────────────────────────────────────────────┐
+│                      │        │                                                  │
+│   Slack Workspace    │◄───────┼────────┐         ┌────────────────────────────┐  │
+│                      │Socket  │        │         │   Target Infrastructure    │  │
+│  • #server-ops       │Mode    │        ▼         │                            │  │
+│  • Slash Commands    │(WSS)   │ ┌──────────────┐ │ • GPU Metrics (NVML)       │  │
+│  • Bot Mentions      │───────►│ │  Health Bot  │─┼─► • AI/ML Engine Endpoints  │  │
+│                      │        │ │ (Dockerized) │ │ • Vector DBs & Caches      │  │
+└──────────────────────┘        │ └──────────────┘ │ • Message Brokers (Kafka)  │  │
+                                │                  │                            │  │
+                                │                  └────────────────────────────┘  │
+                                └──────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Konfigurasi
+## 📊 Monitored Service Fleet
+
+| Category | Targets & Services |
+| :--- | :--- |
+| **GPU Compute** | NVIDIA RTX A6000 (VRAM allocation, thermal load, active task capacity) |
+| **AI & ML Engines** | `docling`, `embeddings (bge-m3)`, `embeddings (minilm)`, `nlp (spacy)`, `reranker (bge-m3)` |
+| **Core Infrastructure** | `elasticsearch`, `kafka`, `minio`, `neo4j`, `qdrant`, `redis`, `searxng`, `vane`, `lightpanda` |
+
+---
+
+## 📸 Message Showcase
+
+### 1. Full Production Health Audit
+```text
+🏥 TensorNex Health Report
+─────────────────────────────────────────────
+
+✅ GPU Server — HEALTHY
+  ├ 🎮 NVIDIA RTX A6000
+  ├ 💾 VRAM: 2.37 / 51.16 GB
+  └ ⚡ Active tasks: 0 / 2
+
+🧠 AI & ML Engines (5/5 healthy)
+  ✅ docling
+  ✅ embeddings (bge-m3)
+  ✅ embeddings (minilm)
+  ✅ nlp (spacy)
+  ✅ reranker (bge-m3)
+
+📦 Infrastructure Services (9/9 healthy)
+  ✅ elasticsearch
+  ✅ kafka
+  ✅ lightpanda
+  ✅ minio
+  ✅ neo4j
+  ✅ qdrant
+  ✅ redis
+  ✅ searxng
+  ✅ vane
+
+⏰ 2026-10-31 18:53:00 UTC
+```
+
+### 2. Instant Service Down Incident Alert
+```text
+🚨 ALERT — Service Down
+─────────────────────────────────────────────
+❌ neo4j — Connection refused (HTTP 503)
+
+⏰ Detected: 2026-10-31 03:25:00 UTC • Status: Critical
+```
+
+### 3. Recovery Confirmation
+```text
+✅ Service Recovered
+─────────────────────────────────────────────
+✅ neo4j — Back online & passing health probes
+
+⏰ Recovered: 2026-10-31 03:30:00 UTC • Outage Duration: 5m
+```
+
+---
+
+## ⚙️ Configuration & Environment Variables
+
+Copy the provided template and define your environment secrets:
 
 ```bash
-cd slack-bot
 cp .env.example .env
 ```
 
-Edit `.env` dan isi semua value:
-
-```env
-SLACK_BOT_TOKEN=xoxb-xxxx-xxxx-xxxx
-SLACK_APP_TOKEN=xapp-xxxx-xxxx
-SLACK_SIGNING_SECRET=abc123def456
-SLACK_ALERT_CHANNEL=C0BELBY2F3R
-
-TENSORNEX_BASE_URL=http://IP_SERVER_TENSORNEX:8000
-TENSORNEX_API_KEY=your-internal-api-key
-
-CHECK_INTERVAL_MINUTES=5
-REQUEST_TIMEOUT=30
-```
-
-| Variable | Keterangan |
-|----------|-----------|
-| `SLACK_BOT_TOKEN` | Dari OAuth & Permissions (`xoxb-...`) |
-| `SLACK_APP_TOKEN` | Dari Socket Mode (`xapp-...`) |
-| `SLACK_SIGNING_SECRET` | Dari Basic Information |
-| `SLACK_ALERT_CHANNEL` | Channel ID untuk auto-alert |
-| `TENSORNEX_BASE_URL` | URL server TensorNex (misal `http://123.45.67.89:8000`) |
-| `TENSORNEX_API_KEY` | API key internal (sama dengan `INTERNAL_API_KEY` di server) |
-| `CHECK_INTERVAL_MINUTES` | Interval cek berkala (default: 5 menit) |
+| Variable | Description |
+| :--- | :--- |
+| `SLACK_BOT_TOKEN` | Bot User OAuth Token (`xoxb-...`) with write permissions. |
+| `SLACK_APP_TOKEN` | App-Level Token (`xapp-...`) with `connections:write` scope for Socket Mode. |
+| `SLACK_SIGNING_SECRET` | Secret from Slack Basic Information to verify payload authenticity. |
+| `SLACK_ALERT_CHANNEL` | Slack channel ID (e.g., `C0BELBY2F3R`) dedicated for operations alerts. |
+| `TENSORNEX_BASE_URL` | Base endpoint URL of the target host or cluster. |
+| `TENSORNEX_API_KEY` | Bearer/Internal API key for protected health endpoints. |
+| `CHECK_INTERVAL_MINUTES`| Background polling frequency (default: `5` minutes). |
+| `REQUEST_TIMEOUT` | Timeout limit for outbound HTTP health probes in seconds. |
 
 ---
 
-## Jalankan
+## 🚀 Quickstart & Deployment
 
-### Opsi A: Langsung Python
+### Method 1: Docker Compose (Recommended)
 
 ```bash
+# Clone the repository
+git clone https://github.com/edwanannnn/health-bot.git
+cd health-bot
+
+# Set up your environment variables
+cp .env.example .env
+# nano .env
+
+# Launch container in detached mode
+docker compose up -d
+
+# Inspect live container logs
+docker compose logs -f
+```
+
+### Method 2: Standalone Python 3.11
+
+```bash
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run daemon
 python bot.py
 ```
 
-### Opsi B: Docker
+---
 
-```bash
-docker compose up -d
-```
+## 🔒 Security Best Practices
 
-### Opsi C: Docker Build Manual
-
-```bash
-docker build -t tensornex-bot .
-docker run -d --name tensornex-bot --env-file .env --restart unless-stopped tensornex-bot
-```
+- **Strict Secret Isolation:** `.env` files and production tokens are strictly ignored by `.gitignore` and never committed into version control.
+- **Least-Privilege Scopes:** Bot only requests necessary read/write scopes for direct messaging and channel alerts.
+- **Isolated Network Architecture:** Docker container leverages internal container networks, minimizing attack surfaces.
 
 ---
 
-## Cara Pakai di Slack
+## 📄 License
 
-### On-Demand Check
-```
-/healthcheck
-```
-
-### Mention Bot
-```
-@TensorNexBot status gimana?
-```
-
-### DM Bot
-Langsung kirim pesan apapun ke bot.
-
----
-
-## Contoh Output
-
-### Full Report
-```
-🏥 TensorNex Health Report
-─────────────────────────
-
-✅ GPU Server — HEALTHY
-├─ 🎮 NVIDIA RTX A6000
-├─ 💾 VRAM: 12.5 / 48.0 GB
-└─ ⚡ Active tasks: 2 / 4
-
-🧠 AI & ML Engines (5/5 healthy)
-✅ docling
-✅ embeddings (bge-m3)
-✅ embeddings (minilm)
-✅ nlp (spacy)
-✅ reranker (bge-m3)
-
-📦 Infrastructure Services (9/9 healthy)
-✅ elasticsearch
-✅ kafka
-✅ lightpanda
-✅ minio
-✅ neo4j
-✅ qdrant
-✅ redis
-✅ searxng
-✅ vane
-
-⏰ 2026-10-23 01:00:00 UTC
-```
-
-### Auto Alert (hanya muncul kalau ada service DOWN)
-```
-🚨 ALERT — Service Down
-─────────────────────────
-❌ neo4j — Connection refused
-
-⏰ Detected at 2026-10-13 03:25:00 UTC • Previously healthy
-```
-
-### Recovery Notification
-```
-✅ Service Recovered
-─────────────────────────
-✅ neo4j — back online
-
-⏰ Recovered at 2026-10-13 03:30:00 UTC
-```
+Distributed under the **MIT License**. See `LICENSE` for more information.
